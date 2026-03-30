@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --color-neon-a: #39FF14;
+  --color-neon-t: #BF00FF;
+  --color-neon-c: #FF007F;
+  --color-neon-g: #00FFFF;
+  --color-lab-dark: #2D2D2D;
+  --color-lab-bg: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-lab-bg text-lab-dark font-mono antialiased overflow-x-hidden;
+    cursor: crosshair;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(45, 45, 45, 0.05) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+
+  ::selection {
+    @apply bg-lab-dark text-white;
+  }
+}
+
+@layer components {
+  .lab-border {
+    @apply border border-lab-dark/10;
+  }
+
+  .lab-card {
+    /* Manually expanded lab-border to avoid 'unknown utility' error in v4 */
+    @apply p-6 border border-lab-dark/10 bg-white shadow-sm;
+  }
+
+  .btn-lab {
+    @apply px-4 py-2 border border-lab-dark hover:bg-lab-dark hover:text-white transition-all duration-300 uppercase text-xs tracking-widest font-bold;
+  }
+}
+
+/* DNA Elements */
+.dna-node {
+  @apply cursor-pointer transition-all duration-300;
+}
+
+.dna-label {
+  @apply pointer-events-none transition-all duration-300;
+}
+
+/* Scanning Overlay Effect */
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(45, 45, 45, 0.02);
+  z-index: 50;
+  pointer-events: none;
+  animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+  from { transform: translateY(-100vh); }
+  to { transform: translateY(100vh); }
+}
