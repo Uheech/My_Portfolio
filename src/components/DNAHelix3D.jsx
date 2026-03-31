@@ -7,21 +7,21 @@ import * as THREE from 'three';
 const DNAHelix3D = ({ onSelect, transitionPhase = 'idle' }) => {
   return (
     <div className="w-full h-full relative bg-transparent flex items-center justify-center">
-      <Canvas 
+      <Canvas
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true, logarithmicDepthBuffer: true }}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 24]} fov={45} />
         <ambientLight intensity={1.5} />
         <pointLight position={[10, 10, 20]} intensity={3} />
-        
+
         <DNAStructure onSelect={onSelect} transitionPhase={transitionPhase} />
-        
+
         <EffectComposer disableNormalPass multisampling={4}>
-          <Bloom 
-            intensity={transitionPhase === 'focus' ? 2.5 : 1.0} 
-            luminanceThreshold={0.8} 
-            luminanceSmoothing={0.1} 
+          <Bloom
+            intensity={transitionPhase === 'focus' ? 2.5 : 1.0}
+            luminanceThreshold={0.8}
+            luminanceSmoothing={0.1}
             mipmapBlur
           />
         </EffectComposer>
@@ -72,15 +72,15 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
     const posA = new Float32Array(backboneDensity * 3);
     const posB = new Float32Array(backboneDensity * 3);
     for (let i = 0; i < backboneDensity; i++) {
-        const t = (i / backboneDensity) * height - height / 2;
-        const phi = ((t + height / 2) / wavelength) * 2 * Math.PI;
-        const jitter = 0.1;
-        posA[i * 3] = amplitude * Math.sin(phi) + (Math.random() - 0.5) * jitter;
-        posA[i * 3 + 1] = t + (Math.random() - 0.5) * jitter;
-        posA[i * 3 + 2] = amplitude * Math.cos(phi) + (Math.random() - 0.5) * jitter;
-        posB[i * 3] = amplitude * Math.sin(phi + Math.PI) + (Math.random() - 0.5) * jitter;
-        posB[i * 3 + 1] = t + (Math.random() - 0.5) * jitter;
-        posB[i * 3 + 2] = amplitude * Math.cos(phi + Math.PI) + (Math.random() - 0.5) * jitter;
+      const t = (i / backboneDensity) * height - height / 2;
+      const phi = ((t + height / 2) / wavelength) * 2 * Math.PI;
+      const jitter = 0.1;
+      posA[i * 3] = amplitude * Math.sin(phi) + (Math.random() - 0.5) * jitter;
+      posA[i * 3 + 1] = t + (Math.random() - 0.5) * jitter;
+      posA[i * 3 + 2] = amplitude * Math.cos(phi) + (Math.random() - 0.5) * jitter;
+      posB[i * 3] = amplitude * Math.sin(phi + Math.PI) + (Math.random() - 0.5) * jitter;
+      posB[i * 3 + 1] = t + (Math.random() - 0.5) * jitter;
+      posB[i * 3 + 2] = amplitude * Math.cos(phi + Math.PI) + (Math.random() - 0.5) * jitter;
     }
     return { posA, posB };
   }, [backboneDensity, height, wavelength, amplitude]);
@@ -113,14 +113,14 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
         const fixedFillerColor = fillerColors[0];
 
         return (
-          <RungSolidLine 
+          <RungSolidLine
             key={i}
             y={y}
             phi={phi}
             amplitude={amplitude}
             metadata={interaction}
             color={interaction ? interaction.color : fixedFillerColor}
-            isHovered={hoveredRung === (interaction ? interaction.id : null)}
+            isHovered={interaction ? hoveredRung === interaction.id : false}
             onHover={setHoveredRung}
             onSelect={onSelect}
             targetOpacity={targetOpacity.current}
@@ -138,10 +138,10 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
   const mid = new THREE.Vector3().lerpVectors(p1, p2, 0.5);
   const dir = new THREE.Vector3().subVectors(p1, p2).normalize();
   const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
-  
+
   const gap = isHovered ? 0.05 : 0.65;
-  const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.7;
-  const lineWidth = isInteractive ? (isHovered ? 0.08 : 0.04) : 0.02;
+  const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.5;
+  const lineWidth = isInteractive ? (isHovered ? 0.08 : 0.04) : 0.03;
 
   return (
     <group
@@ -157,13 +157,27 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
       )}
 
       <group position={mid} quaternion={quaternion}>
-        <mesh position={[0, (gap/2 + (amplitude - gap/2)/2), 0]}>
-          <cylinderGeometry args={[lineWidth, lineWidth, (amplitude - gap/2), 8]} />
-          <meshStandardMaterial color={color} transparent opacity={lineOpacity} emissive={color} emissiveIntensity={isInteractive ? 0.5 : 0} />
+        {/* p1 방향 메쉬 (텍스트 쪽): 형광색 적용 및 인터랙티브 전용 굵기 유지 */}
+        <mesh position={[0, (gap / 2 + (amplitude - gap / 2) / 2), 0]}>
+          <cylinderGeometry args={[lineWidth, lineWidth, (amplitude - gap / 2), 8]} />
+          <meshStandardMaterial
+            color={color}
+            transparent
+            opacity={lineOpacity}
+            emissive={color}
+            emissiveIntensity={isInteractive ? 0.5 : 0}
+          />
         </mesh>
-        <mesh position={[0, -(gap/2 + (amplitude - gap/2)/2), 0]}>
-          <cylinderGeometry args={[lineWidth, lineWidth, (amplitude - gap/2), 8]} />
-          <meshStandardMaterial color={color} transparent opacity={lineOpacity} emissive={color} emissiveIntensity={isInteractive ? 0.5 : 0} />
+        {/* p2 방향 메쉬 (반대쪽): 항상 회색 적용 및 배경 노드와 동일한 굵기(0.03) 적용 */}
+        <mesh position={[0, -(gap / 2 + (amplitude - gap / 2) / 2), 0]}>
+          <cylinderGeometry args={[0.03, 0.03, (amplitude - gap / 2), 8]} />
+          <meshStandardMaterial
+            color={isInteractive ? "#94a3b8" : color}
+            transparent
+            opacity={isInteractive ? targetOpacity * 0.5 : lineOpacity}
+            emissive="#94a3b8"
+            emissiveIntensity={0}
+          />
         </mesh>
       </group>
 
@@ -190,22 +204,22 @@ const BackgroundParticles = ({ transitionPhase }) => {
     const count = 1200;
     const p = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-        p[i * 3] = (Math.random() - 0.5) * 60;
-        p[i * 3 + 1] = (Math.random() - 0.5) * 60;
-        p[i * 3 + 2] = (Math.random() - 0.5) * 60;
+      p[i * 3] = (Math.random() - 0.5) * 60;
+      p[i * 3 + 1] = (Math.random() - 0.5) * 60;
+      p[i * 3 + 2] = (Math.random() - 0.5) * 60;
     }
     return p;
   }, []);
 
   return (
     <Points positions={points}>
-      <PointMaterial 
-        transparent 
-        color="#cbd5e1" 
-        size={0.05} 
-        sizeAttenuation={true} 
-        depthWrite={false} 
-        opacity={transitionPhase === 'shrink' ? 0.1 : 0.3} 
+      <PointMaterial
+        transparent
+        color="#cbd5e1"
+        size={0.05}
+        sizeAttenuation={true}
+        depthWrite={false}
+        opacity={transitionPhase === 'shrink' ? 0.1 : 0.3}
       />
     </Points>
   );
