@@ -66,3 +66,22 @@
   from { transform: translateY(-100vh); }
   to { transform: translateY(100vh); }
 }
+
+@keyframes shimmer {
+  0% { opacity: 0.1; }
+  50% { opacity: 0.6; filter: brightness(1.5); }
+  100% { opacity: 0.1; }
+}
+
+@keyframes pulse-fast {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 1s infinite alternate;
+}

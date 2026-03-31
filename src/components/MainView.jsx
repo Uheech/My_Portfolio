@@ -24,10 +24,11 @@ const MainView = ({ onSelectProject }) => {
     <div className="h-screen w-full flex flex-col items-center justify-center p-8 bg-white overflow-hidden relative">
       {/* Background Decoration */}
       <div className="scan-line" />
+      <DataStream />
       
       {/* Top Left Info */}
       <motion.div 
-        className="absolute top-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark pl-4"
+        className="absolute top-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark pl-4 z-20"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
       >
@@ -40,7 +41,7 @@ const MainView = ({ onSelectProject }) => {
 
       {/* Top Right Info */}
       <motion.div 
-        className="absolute top-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark pr-4"
+        className="absolute top-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark pr-4 z-20"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
       >
@@ -95,7 +96,7 @@ const MainView = ({ onSelectProject }) => {
 
       {/* Footer Decoration */}
       <motion.div 
-        className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/20 pl-4"
+        className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/20 pl-4 z-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -103,7 +104,7 @@ const MainView = ({ onSelectProject }) => {
       </motion.div>
 
       <motion.div 
-        className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/20 pr-4"
+        className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/20 pr-4 z-20"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -113,6 +114,35 @@ const MainView = ({ onSelectProject }) => {
     </div>
   );
 };
+
+// Subtle background data stream component
+const DataStream = () => {
+  const streams = Array.from({ length: 15 });
+  
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] flex justify-around">
+      {streams.map((_, i) => (
+        <motion.div
+          key={i}
+          className="text-[10px] font-mono whitespace-nowrap orientation-vertical writing-mode-vertical"
+          initial={{ y: -500 }}
+          animate={{ y: 1000 }}
+          transition={{
+            duration: 15 + Math.random() * 15,
+            repeat: Infinity,
+            ease: "linear",
+            delay: Math.random() * 10
+          }}
+        >
+          {Array.from({ length: 40 }).map(() => 
+            Math.floor(Math.random() * 16).toString(16).toUpperCase()
+          ).join('')}
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 
 export default MainView;
 
