@@ -3,11 +3,11 @@
 @theme {
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 
-  --color-neon-a: #39FF14;
-  --color-neon-t: #BF00FF;
-  --color-neon-c: #FF007F;
-  --color-neon-g: #00FFFF;
-  --color-lab-dark: #2D2D2D;
+  --color-neon-a: #2ECC71;
+  --color-neon-t: #A569BD;
+  --color-neon-p: #EC4899;
+  --color-neon-g: #0EA5E9;
+  --color-lab-dark: #0F172A;
   --color-lab-bg: #FFFFFF;
 }
 
@@ -16,7 +16,7 @@
     @apply bg-lab-bg text-lab-dark font-mono antialiased overflow-x-hidden;
     cursor: crosshair;
     background-image: 
-      radial-gradient(circle at 1px 1px, rgba(45, 45, 45, 0.05) 1px, transparent 0);
+      radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.05) 1px, transparent 0);
     background-size: 40px 40px;
   }
 

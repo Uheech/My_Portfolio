@@ -37,7 +37,7 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
 
   return (
     <motion.div 
-      className="h-screen w-full flex flex-row items-center justify-center p-8 bg-white overflow-hidden relative font-mono"
+      className="h-screen w-full flex flex-row items-center justify-center p-8 bg-lab-bg overflow-hidden relative font-mono"
       animate={{ 
         filter: transitionPhase === 'focus' ? 'blur(8px)' : 'blur(0px)',
         scale: transitionPhase === 'focus' ? 1.05 : 1

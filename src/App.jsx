@@ -18,7 +18,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-lab-dark font-mono selection:bg-lab-dark selection:text-white relative">
+    <div className="min-h-screen bg-lab-bg text-lab-dark font-mono selection:bg-lab-dark selection:text-white relative">
       {/* Global Scanline Overlay */}
       <div className="scan-line opacity-[0.03]" />
       

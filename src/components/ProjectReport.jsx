@@ -31,7 +31,7 @@ const ProjectReport = ({ projectId, onBack }) => {
   const analysisDate = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
   return (
-    <div className="min-h-screen bg-white p-6 md:p-12 lg:p-20 flex flex-col font-mono max-w-7xl mx-auto relative overflow-x-hidden">
+    <div className="min-h-screen bg-lab-bg p-6 md:p-12 lg:p-20 flex flex-col font-mono max-w-7xl mx-auto relative overflow-x-hidden">
       <div className="scan-line opacity-10" />
       
       {/* Background Microgrid Decor */}
