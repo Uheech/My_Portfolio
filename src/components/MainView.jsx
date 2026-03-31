@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import DNAHelix3D from './DNAHelix3D';
+import ProfileDashboard from './ProfileDashboard';
+import { UserCircle2 } from 'lucide-react';
 
 const MainView = ({ onSelectProject, isReturning = false }) => {
   const [timestamp, setTimestamp] = useState('');
   const [transitionPhase, setTransitionPhase] = useState(isReturning ? 'shrink' : 'idle');
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -46,8 +49,11 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
     >
       {/* Background Decoration */}
       <div className="scan-line" />
-      <DataStream />
+      <DataStream opacity={showProfile ? 0.01 : 0.03} />
       
+      {/* Profile Dashboard Component */}
+      <ProfileDashboard isOpen={showProfile} onClose={() => setShowProfile(false)} />
+
       {/* Top Left Info */}
       <motion.div 
         className="absolute top-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark pl-4 z-20"
@@ -70,21 +76,21 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ 
           opacity: transitionPhase === 'idle' ? 1 : 0, 
-          x: transitionPhase === 'idle' ? 0 : 20 
+          x: transitionPhase === 'idle' ? (showProfile ? 20 : 0) : 20 
         }}
       >
         <span className="text-[10px] font-bold tracking-[0.2em]">LAB_ARCHIVE_V3</span>
         <span className="text-[9px] text-lab-dark/40">LAT: 37.5665 / LONG: 126.9780</span>
       </motion.div>
 
-      {/* Left Content (Title) */}
+      {/* Left Content (Title) - Shifts right when profile is open */}
       <motion.div
-        className="absolute left-24 flex flex-col gap-6 z-10 max-w-sm"
+        className="absolute left-24 flex flex-col gap-6 z-20 max-w-sm"
         animate={{ 
-          opacity: transitionPhase === 'idle' ? 1 : 0, 
-          x: transitionPhase === 'idle' ? 0 : -40 
+          opacity: transitionPhase === 'idle' ? (showProfile ? 0.3 : 1) : 0, 
+          x: transitionPhase === 'idle' ? (showProfile ? 540 : 0) : -40 
         }}
-        transition={{ duration: 0.6 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 100 }}
       >
         <div className="flex flex-col gap-3">
           <motion.span 
@@ -111,25 +117,37 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
             through biological logic and engineering.
           </p>
         </div>
+
+        {/* Profile Entry Point */}
+        <motion.button
+          onClick={() => setShowProfile(true)}
+          className="mt-6 flex items-center gap-3 w-fit group border-b border-transparent hover:border-lab-dark transition-all"
+        >
+          <div className="p-2 border-2 border-lab-dark rounded-full group-hover:bg-lab-dark group-hover:text-white transition-all">
+            <UserCircle2 size={16} />
+          </div>
+          <span className="text-[10px] font-black tracking-widest uppercase">[ ACCESS_ANALYST_ID ]</span>
+        </motion.button>
       </motion.div>
 
-      {/* Center: DNA Helix (Real 3D) */}
+      {/* Center: DNA Helix (Real 3D) - Shifts right when profile is open */}
       <motion.div 
-        className="z-20 w-full h-full flex items-center justify-center relative"
+        className="z-10 w-full h-full flex items-center justify-center relative"
         animate={{
-          opacity: transitionPhase === 'shrink' ? 0 : 1,
-          scale: transitionPhase === 'shrink' ? 0.8 : 1
+          opacity: transitionPhase === 'shrink' ? 0 : (showProfile ? 0.8 : 1),
+          scale: transitionPhase === 'shrink' ? 0.8 : (showProfile ? 0.9 : 1),
+          x: showProfile ? 300 : 0
         }}
-        transition={{ duration: 0.8 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 100 }}
       >
         <DNAHelix3D onSelect={handleSelect} transitionPhase={transitionPhase} />
       </motion.div>
 
       {/* Bottom Center Prompt */}
       <motion.div
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-20"
         initial={{ opacity: 0 }}
-        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+        animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 1 : 0 }}
       >
         <p className="text-[9px] uppercase tracking-[0.4em] font-black text-lab-dark/30 animate-pulse">
           Select_Sequence_to_Analyze
@@ -140,7 +158,10 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
       {/* Footer info labels */}
       <motion.div 
         className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/10 pl-4 z-20"
-        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+        animate={{ 
+          opacity: transitionPhase === 'idle' ? 1 : 0,
+          x: showProfile ? -20 : 0
+        }}
       >
         <span className="text-[10px] text-lab-dark/40 tracking-[0.2em] font-black uppercase">MEMORY_DUMP: 0X4F2A...</span>
         <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">System_Log::Init_Success</span>
@@ -148,7 +169,10 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
 
       <motion.div 
         className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/10 pr-4 z-20"
-        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+        animate={{ 
+          opacity: transitionPhase === 'idle' ? 1 : 0,
+          x: showProfile ? 20 : 0
+        }}
       >
         <span className="text-[10px] text-lab-dark/60 tracking-[0.2em] font-black uppercase">BUILT WITH LOGIC & CREATIVITY</span>
         <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">Verification_Key::7771-NX</span>

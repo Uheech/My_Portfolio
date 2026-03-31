@@ -50,7 +50,7 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   ];
 
   // 더 세련된 테크니컬 필러 컬러 팔레트
-  const fillerColors = ['#cbd5e1', '#94a3b8', '#64748b', '#93c5fd', '#bae6fd', '#c4b5fd'];
+  const fillerColors = ['#94a3b8'];
 
   const targetScale = useRef(1);
   const targetOpacity = useRef(1);
@@ -104,10 +104,13 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
       </Points>
 
       {Array.from({ length: totalRungs }).map((_, i) => {
+        // 인터랙티브 노드 간격(8)의 절반인 4단위로 노드 배치 (i: 0, 4, 8, 12, 16, 20, 24...)
+        if ((i - 4) % 4 !== 0) return null;
+
         const y = (i / totalRungs) * height - height / 2;
         const phi = ((y + height / 2) / wavelength) * 2 * Math.PI;
         const interaction = interactiveRungs.find(r => Math.abs(r.yIndex - i) < 0.5);
-        const randomColor = fillerColors[i % fillerColors.length];
+        const fixedFillerColor = fillerColors[0];
 
         return (
           <RungSolidLine 
@@ -116,7 +119,7 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
             phi={phi}
             amplitude={amplitude}
             metadata={interaction}
-            color={interaction ? interaction.color : randomColor}
+            color={interaction ? interaction.color : fixedFillerColor}
             isHovered={hoveredRung === (interaction ? interaction.id : null)}
             onHover={setHoveredRung}
             onSelect={onSelect}
@@ -137,8 +140,8 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
   const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
   
   const gap = isHovered ? 0.05 : 0.65;
-  const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.5;
-  const lineWidth = isInteractive ? (isHovered ? 0.15 : 0.08) : 0.035;
+  const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.7;
+  const lineWidth = isInteractive ? (isHovered ? 0.08 : 0.04) : 0.02;
 
   return (
     <group
