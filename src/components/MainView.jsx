@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import DNAHelix from './DNAHelix';
+import DNAHelix3D from './DNAHelix3D';
 
-const MainView = ({ onSelectProject }) => {
-  const [isConverging, setIsConverging] = useState(false);
+const MainView = ({ onSelect }) => {
   const [timestamp, setTimestamp] = useState('');
+  const [isConverging, setIsConverging] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimestamp(new Date().toISOString());
-    }, 100);
-    return () => clearInterval(timer);
+    const updateTime = () => {
+      const now = new Date();
+      setTimestamp(now.toISOString().replace('T', ' ').substring(0, 19) + 'Z');
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSelect = (id) => {
     setIsConverging(true);
     setTimeout(() => {
-      onSelectProject(id);
-    }, 1000);
+      onSelect(id);
+    }, 1500);
   };
 
   return (
-    <div className="h-screen w-full flex flex-col items-center justify-center p-8 bg-white overflow-hidden relative">
+    <div className="h-screen w-full flex flex-row items-center justify-center p-8 bg-white overflow-hidden relative font-mono">
       {/* Background Decoration */}
       <div className="scan-line" />
       <DataStream />
@@ -34,9 +37,9 @@ const MainView = ({ onSelectProject }) => {
       >
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-neon-a animate-pulse" />
-          <span className="text-[10px] font-bold tracking-[0.2em]">SYSTEM_ACTIVE</span>
+          <span className="text-[10px] font-bold tracking-[0.2em]">STATION_ACTIVE</span>
         </div>
-        <span className="text-[9px] text-lab-dark/40 font-mono">{timestamp}</span>
+        <span className="text-[9px] text-lab-dark/40">{timestamp}</span>
       </motion.div>
 
       {/* Top Right Info */}
@@ -45,72 +48,72 @@ const MainView = ({ onSelectProject }) => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
       >
-        <span className="text-[10px] font-bold tracking-[0.2em]">LAB_ARCHIVE_01</span>
+        <span className="text-[10px] font-bold tracking-[0.2em]">LAB_ARCHIVE_V3</span>
         <span className="text-[9px] text-lab-dark/40">LAT: 37.5665 / LONG: 126.9780</span>
       </motion.div>
 
-      {/* Main Content */}
-      <div className="flex flex-col items-center relative gap-16 z-10">
-        <motion.div
-          className="text-center flex flex-col gap-6"
-          animate={{ opacity: isConverging ? 0 : 1, y: isConverging ? -40 : 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="flex flex-col gap-2">
-            <motion.span 
-              className="text-[10px] tracking-[0.5em] text-lab-dark/40 uppercase"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              UHEECH_EXPERIMENTAL_STATION
-            </motion.span>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-lab-dark leading-none">
-              <span className="block">전공의 담장을 허무는</span>
-              <span className="inline-block bg-lab-dark text-white px-4 py-1 mt-2 transform -skew-x-6">
-                잡식성 해결사
-              </span>
-            </h1>
-          </div>
-          <p className="text-[11px] opacity-60 tracking-[0.4em] font-light uppercase">
-            Cross-Disciplinary Problem Solver _ Project Index
+      {/* Left Content (Title) */}
+      <motion.div
+        className="absolute left-24 flex flex-col gap-6 z-10 max-w-sm"
+        animate={{ opacity: isConverging ? 0 : 1, x: isConverging ? -40 : 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <div className="flex flex-col gap-3">
+          <motion.span 
+            className="text-[11px] tracking-[0.4em] text-lab-dark/30 uppercase font-black"
+          >
+            UHEECH_EXPERIMENTAL_STATION
+          </motion.span>
+          <h1 className="text-5xl font-black tracking-tighter text-lab-dark leading-[0.9]">
+            <span className="block mb-2">전공의 담장을</span>
+            <span className="block mb-2">허무는</span>
+            <span className="inline-block bg-lab-dark text-white px-3 py-1 transform -skew-x-6 text-4xl">
+              잡식성 해결사
+            </span>
+          </h1>
+        </div>
+        <p className="text-[10px] opacity-40 tracking-[0.3em] font-bold uppercase leading-relaxed">
+          The Omnivorous Fixer<br/>Digital Blueprint v3.0 // Archive
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3">
+          <div className="w-12 h-[1px] bg-lab-dark/20" />
+          <p className="text-[9px] text-lab-dark/40 leading-relaxed uppercase tracking-widest">
+            Cross-disciplinary problem solving<br/>
+            through biological logic and engineering.
           </p>
-        </motion.div>
+        </div>
+      </motion.div>
 
-        {/* DNA Helix Navigation */}
-        <DNAHelix onSelect={handleSelect} converging={isConverging} />
-
-        <motion.div
-          className="text-center"
-          animate={{ opacity: isConverging ? 0 : 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-[1px] h-12 bg-gradient-to-b from-lab-dark/0 via-lab-dark/40 to-lab-dark/0" />
-            <p className="text-[9px] uppercase tracking-[0.3em] font-bold animate-pulse">
-              Select_Node_to_Initialize
-            </p>
-          </div>
-        </motion.div>
+      {/* Center: DNA Helix (Real 3D) */}
+      <div className="z-20 w-[1000px] h-full flex items-center justify-center relative">
+        <DNAHelix3D onSelect={handleSelect} />
       </div>
 
-      {/* Footer Decoration */}
-      <motion.div 
-        className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/20 pl-4 z-20"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <span className="text-[9px] text-lab-dark/40 uppercase">Memory_Dump: 0x4F2A...</span>
-      </motion.div>
+      {/* Bottom Center Prompt */}
+      {!isConverging && (
+        <motion.div
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <p className="text-[9px] uppercase tracking-[0.4em] font-black text-lab-dark/30 animate-pulse">
+            Select_Sequence_to_Analyze
+          </p>
+          <div className="w-[1px] h-8 bg-gradient-to-b from-lab-dark/0 via-lab-dark/20 to-lab-dark/0" />
+        </motion.div>
+      )}
 
-      <motion.div 
-        className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/20 pr-4 z-20"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <span className="text-[10px] text-lab-dark/60 tracking-[0.1em] font-bold">V.1.0.4_STABLE</span>
-        <span className="text-[9px] text-lab-dark/40 uppercase">Built with Logic & Creativity</span>
-      </motion.div>
+      {/* Footer info labels */}
+      <div className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/10 pl-4 z-20">
+        <span className="text-[10px] text-lab-dark/40 tracking-[0.2em] font-black uppercase">MEMORY_DUMP: 0X4F2A...</span>
+        <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">System_Log::Init_Success</span>
+      </div>
+
+      <div className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/10 pr-4 z-20">
+        <span className="text-[10px] text-lab-dark/60 tracking-[0.2em] font-black uppercase">BUILT WITH LOGIC & CREATIVITY</span>
+        <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">Verification_Key::7771-NX</span>
+      </div>
     </div>
   );
 };
