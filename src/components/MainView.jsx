@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import DNAHelix3D from './DNAHelix3D';
 
-const MainView = ({ onSelect }) => {
+const MainView = ({ onSelectProject, isReturning = false }) => {
   const [timestamp, setTimestamp] = useState('');
-  const [isConverging, setIsConverging] = useState(false);
+  const [transitionPhase, setTransitionPhase] = useState(isReturning ? 'shrink' : 'idle');
 
   useEffect(() => {
     const updateTime = () => {
@@ -16,15 +16,34 @@ const MainView = ({ onSelect }) => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (isReturning) {
+      const timer = setTimeout(() => {
+        setTransitionPhase('idle');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isReturning]);
+
   const handleSelect = (id) => {
-    setIsConverging(true);
+    setTransitionPhase('focus');
     setTimeout(() => {
-      onSelect(id);
-    }, 1500);
+      setTransitionPhase('shrink');
+      setTimeout(() => {
+        onSelectProject(id);
+      }, 1000);
+    }, 800);
   };
 
   return (
-    <div className="h-screen w-full flex flex-row items-center justify-center p-8 bg-white overflow-hidden relative font-mono">
+    <motion.div 
+      className="h-screen w-full flex flex-row items-center justify-center p-8 bg-white overflow-hidden relative font-mono"
+      animate={{ 
+        filter: transitionPhase === 'focus' ? 'blur(8px)' : 'blur(0px)',
+        scale: transitionPhase === 'focus' ? 1.05 : 1
+      }}
+      transition={{ duration: 0.8 }}
+    >
       {/* Background Decoration */}
       <div className="scan-line" />
       <DataStream />
@@ -33,7 +52,10 @@ const MainView = ({ onSelect }) => {
       <motion.div 
         className="absolute top-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark pl-4 z-20"
         initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
+        animate={{ 
+          opacity: transitionPhase === 'idle' ? 1 : 0, 
+          x: transitionPhase === 'idle' ? 0 : -20 
+        }}
       >
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-neon-a animate-pulse" />
@@ -46,7 +68,10 @@ const MainView = ({ onSelect }) => {
       <motion.div 
         className="absolute top-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark pr-4 z-20"
         initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
+        animate={{ 
+          opacity: transitionPhase === 'idle' ? 1 : 0, 
+          x: transitionPhase === 'idle' ? 0 : 20 
+        }}
       >
         <span className="text-[10px] font-bold tracking-[0.2em]">LAB_ARCHIVE_V3</span>
         <span className="text-[9px] text-lab-dark/40">LAT: 37.5665 / LONG: 126.9780</span>
@@ -55,8 +80,11 @@ const MainView = ({ onSelect }) => {
       {/* Left Content (Title) */}
       <motion.div
         className="absolute left-24 flex flex-col gap-6 z-10 max-w-sm"
-        animate={{ opacity: isConverging ? 0 : 1, x: isConverging ? -40 : 0 }}
-        transition={{ duration: 0.8 }}
+        animate={{ 
+          opacity: transitionPhase === 'idle' ? 1 : 0, 
+          x: transitionPhase === 'idle' ? 0 : -40 
+        }}
+        transition={{ duration: 0.6 }}
       >
         <div className="flex flex-col gap-3">
           <motion.span 
@@ -86,37 +114,49 @@ const MainView = ({ onSelect }) => {
       </motion.div>
 
       {/* Center: DNA Helix (Real 3D) */}
-      <div className="z-20 w-[1000px] h-full flex items-center justify-center relative">
-        <DNAHelix3D onSelect={handleSelect} />
-      </div>
+      <motion.div 
+        className="z-20 w-full h-full flex items-center justify-center relative"
+        animate={{
+          opacity: transitionPhase === 'shrink' ? 0 : 1,
+          scale: transitionPhase === 'shrink' ? 0.8 : 1
+        }}
+        transition={{ duration: 0.8 }}
+      >
+        <DNAHelix3D onSelect={handleSelect} transitionPhase={transitionPhase} />
+      </motion.div>
 
       {/* Bottom Center Prompt */}
-      {!isConverging && (
-        <motion.div
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          <p className="text-[9px] uppercase tracking-[0.4em] font-black text-lab-dark/30 animate-pulse">
-            Select_Sequence_to_Analyze
-          </p>
-          <div className="w-[1px] h-8 bg-gradient-to-b from-lab-dark/0 via-lab-dark/20 to-lab-dark/0" />
-        </motion.div>
-      )}
+      <motion.div
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+      >
+        <p className="text-[9px] uppercase tracking-[0.4em] font-black text-lab-dark/30 animate-pulse">
+          Select_Sequence_to_Analyze
+        </p>
+        <div className="w-[1px] h-8 bg-gradient-to-b from-lab-dark/0 via-lab-dark/20 to-lab-dark/0" />
+      </motion.div>
 
       {/* Footer info labels */}
-      <div className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/10 pl-4 z-20">
+      <motion.div 
+        className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/10 pl-4 z-20"
+        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+      >
         <span className="text-[10px] text-lab-dark/40 tracking-[0.2em] font-black uppercase">MEMORY_DUMP: 0X4F2A...</span>
         <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">System_Log::Init_Success</span>
-      </div>
+      </motion.div>
 
-      <div className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/10 pr-4 z-20">
+      <motion.div 
+        className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/10 pr-4 z-20"
+        animate={{ opacity: transitionPhase === 'idle' ? 1 : 0 }}
+      >
         <span className="text-[10px] text-lab-dark/60 tracking-[0.2em] font-black uppercase">BUILT WITH LOGIC & CREATIVITY</span>
         <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">Verification_Key::7771-NX</span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
+
 
 // Subtle background data stream component
 const DataStream = () => {

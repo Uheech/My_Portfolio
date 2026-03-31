@@ -1,43 +1,43 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { PerspectiveCamera, Points, PointMaterial, Text, Float, Billboard, Cylinder } from '@react-three/drei';
+import { PerspectiveCamera, Points, PointMaterial, Text, Billboard, Cylinder } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
-const DNAHelix3D = ({ onSelect }) => {
+const DNAHelix3D = ({ onSelect, transitionPhase = 'idle' }) => {
   return (
-    <div style={{ width: '800px', height: '100vh' }} className="relative bg-transparent flex items-center justify-center">
+    <div className="w-full h-full relative bg-transparent flex items-center justify-center">
       <Canvas 
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
       >
-        <PerspectiveCamera makeDefault position={[0, 0, 22]} fov={45} />
+        <PerspectiveCamera makeDefault position={[0, 0, 24]} fov={45} />
         <ambientLight intensity={1.5} />
         <pointLight position={[10, 10, 20]} intensity={2.5} />
         
-        <DNAStructure onSelect={onSelect} />
+        <DNAStructure onSelect={onSelect} transitionPhase={transitionPhase} />
         
         <EffectComposer disableNormalPass multisampling={4}>
           <Bloom 
-            intensity={1.5} 
+            intensity={transitionPhase === 'focus' ? 3.5 : 1.5} 
             luminanceThreshold={0.1} 
             luminanceSmoothing={1.0} 
             mipmapBlur
           />
         </EffectComposer>
 
-        <BackgroundParticles />
+        <BackgroundParticles transitionPhase={transitionPhase} />
       </Canvas>
     </div>
   );
 };
 
-const DNAStructure = ({ onSelect }) => {
+const DNAStructure = ({ onSelect, transitionPhase }) => {
   const groupRef = useRef();
   const [hoveredRung, setHoveredRung] = useState(null);
 
   const wavelength = 8;
-  const amplitude = 3;
+  const amplitude = 3.5;
   const rungCount = 38;
   const height = 18;
 
@@ -48,9 +48,29 @@ const DNAStructure = ({ onSelect }) => {
     26: { id: 'DATA/QA', color: '#00FFFF' }
   };
 
-  useFrame((state) => {
+  const targetScale = useRef(1);
+  const targetOpacity = useRef(1);
+
+  useEffect(() => {
+    if (transitionPhase === 'focus') {
+      targetScale.current = 1.6;
+      targetOpacity.current = 1;
+    } else if (transitionPhase === 'shrink') {
+      targetScale.current = 0.25;
+      targetOpacity.current = 0.05;
+    } else {
+      targetScale.current = 1;
+      targetOpacity.current = 1;
+    }
+  }, [transitionPhase]);
+
+  useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     if (groupRef.current) {
+      // 부드러운 스케일 및 투명도 전환
+      groupRef.current.scale.lerp(new THREE.Vector3(targetScale.current, targetScale.current, targetScale.current), delta * 4);
+      
+      // 세로 회전 및 부유 애니메이션
       groupRef.current.rotation.y = time * 0.3;
       groupRef.current.position.y = Math.sin(time * 0.4) * 0.25;
     }
@@ -74,24 +94,25 @@ const DNAStructure = ({ onSelect }) => {
             isHovered={hoveredRung === i}
             onHover={setHoveredRung}
             onSelect={onSelect}
+            targetOpacity={targetOpacity.current}
           />
         );
       })}
 
-      {/* 2. Backbone Strands (Spheres for a dot-matrix blueprint look) */}
-      {Array.from({ length: 120 }).map((_, i) => {
-        const y = (i / 120) * height - height / 2;
+      {/* 2. Backbone Strands */}
+      {Array.from({ length: 140 }).map((_, i) => {
+        const y = (i / 140) * height - height / 2;
         const phi = ((y + height / 2) / wavelength) * 2 * Math.PI;
         
         return (
           <group key={i}>
             <mesh position={[amplitude * Math.sin(phi), y, amplitude * Math.cos(phi)]}>
               <sphereGeometry args={[0.07, 8, 8]} />
-              <meshStandardMaterial color="#000" />
+              <meshStandardMaterial color="#000" transparent opacity={targetOpacity.current} />
             </mesh>
             <mesh position={[amplitude * Math.sin(phi + Math.PI), y, amplitude * Math.cos(phi + Math.PI)]}>
               <sphereGeometry args={[0.07, 8, 8]} />
-              <meshStandardMaterial color="#000" />
+              <meshStandardMaterial color="#000" transparent opacity={targetOpacity.current} />
             </mesh>
           </group>
         );
@@ -100,23 +121,19 @@ const DNAStructure = ({ onSelect }) => {
   );
 };
 
-const Rung3D = ({ index, y, phi, amplitude, metadata, isHovered, onHover, onSelect }) => {
+const Rung3D = ({ index, y, phi, amplitude, metadata, isHovered, onHover, onSelect, targetOpacity }) => {
   const gap = isHovered ? 0.05 : 0.6;
   
-  // Rung endpoints
   const p1 = new THREE.Vector3(amplitude * Math.sin(phi), y, amplitude * Math.cos(phi));
   const p2 = new THREE.Vector3(amplitude * Math.sin(phi + Math.PI), y, amplitude * Math.cos(phi + Math.PI));
   
-  // Calculate orientation for the cylinder
   const midPoint = new THREE.Vector3().lerpVectors(p1, p2, 0.5);
   const direction = new THREE.Vector3().subVectors(p1, p2).normalize();
-  
-  // Quaternion to rotate the cylinder from [0, 1, 0] to the rung direction
   const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
 
   const color = metadata ? metadata.color : "#94a3b8";
-  const opacity = metadata ? 1 : 0.4;
-  const radius = isHovered ? 0.12 : 0.04;
+  const opacity = metadata ? targetOpacity : targetOpacity * 0.4;
+  const radius = isHovered ? 0.15 : 0.045;
 
   return (
     <group
@@ -124,46 +141,53 @@ const Rung3D = ({ index, y, phi, amplitude, metadata, isHovered, onHover, onSele
       onPointerOut={() => metadata && onHover(null)}
       onClick={() => metadata && onSelect(metadata.id)}
     >
-      {/* Left part of the split rung */}
       <mesh 
         position={[
-          midPoint.x + (amplitude/2 + gap/2) * direction.x, 
+          midPoint.x + (gap/2 + (amplitude - gap)/2) * direction.x, 
           midPoint.y, 
-          midPoint.z + (amplitude/2 + gap/2) * direction.z
+          midPoint.z + (gap/2 + (amplitude - gap)/2) * direction.z
         ]} 
         quaternion={quaternion}
       >
-        <cylinderGeometry args={[radius, radius, amplitude - gap, 8]} />
-        <meshStandardMaterial color={color} transparent opacity={opacity} emissive={color} emissiveIntensity={isHovered ? 2 : 0.2} />
+        <cylinderGeometry args={[radius, radius, (amplitude - gap), 8]} />
+        <meshStandardMaterial 
+          color={color} 
+          transparent 
+          opacity={opacity} 
+          emissive={color} 
+          emissiveIntensity={isHovered ? 3 : 0.2} 
+        />
       </mesh>
 
-      {/* Right part of the split rung */}
       <mesh 
         position={[
-          midPoint.x - (amplitude/2 + gap/2) * direction.x, 
+          midPoint.x - (gap/2 + (amplitude - gap)/2) * direction.x, 
           midPoint.y, 
-          midPoint.z - (amplitude/2 + gap/2) * direction.z
+          midPoint.z - (gap/2 + (amplitude - gap)/2) * direction.z
         ]} 
         quaternion={quaternion}
       >
-        <cylinderGeometry args={[radius, radius, amplitude - gap, 8]} />
-        <meshStandardMaterial color={color} transparent opacity={opacity} emissive={color} emissiveIntensity={isHovered ? 2 : 0.2} />
+        <cylinderGeometry args={[radius, radius, (amplitude - gap), 8]} />
+        <meshStandardMaterial 
+          color={color} 
+          transparent 
+          opacity={opacity} 
+          emissive={color} 
+          emissiveIntensity={isHovered ? 3 : 0.2} 
+        />
       </mesh>
 
       {metadata && (
         <Billboard
-          position={[amplitude * Math.sin(phi) + (direction.x * 2), y, amplitude * Math.cos(phi) + (direction.z * 2)]}
-          follow={true}
-          lockX={false}
-          lockY={false}
-          lockZ={false}
+          position={[amplitude * Math.sin(phi) + (direction.x * 2.5), y, amplitude * Math.cos(phi) + (direction.z * 2.5)]}
         >
           <Text
             fontSize={0.6}
             color={color}
             anchorX="center"
             anchorY="middle"
-            scale={isHovered ? 1.4 : 1}
+            scale={isHovered ? 1.5 : 1}
+            fillOpacity={targetOpacity}
           >
             {metadata.id}
           </Text>
@@ -173,28 +197,29 @@ const Rung3D = ({ index, y, phi, amplitude, metadata, isHovered, onHover, onSele
   );
 };
 
-const BackgroundParticles = () => {
+const BackgroundParticles = ({ transitionPhase }) => {
   const points = useMemo(() => {
-    const p = new Float32Array(1000 * 3);
-    for (let i = 0; i < 1000; i++) {
-        p[i * 3] = (Math.random() - 0.5) * 40;
-        p[i * 3 + 1] = (Math.random() - 0.5) * 40;
-        p[i * 3 + 2] = (Math.random() - 0.5) * 40;
+    const p = new Float32Array(800 * 3);
+    for (let i = 0; i < 800; i++) {
+        p[i * 3] = (Math.random() - 0.5) * 50;
+        p[i * 3 + 1] = (Math.random() - 0.5) * 50;
+        p[i * 3 + 2] = (Math.random() - 0.5) * 50;
     }
     return p;
   }, []);
 
   return (
     <Points positions={points}>
-      <PointMaterial transparent color="#CBD5E1" size={0.04} sizeAttenuation={true} depthWrite={false} opacity={0.2} />
+      <PointMaterial 
+        transparent 
+        color="#CBD5E1" 
+        size={0.06} 
+        sizeAttenuation={true} 
+        depthWrite={false} 
+        opacity={transitionPhase === 'shrink' ? 0.05 : 0.2} 
+      />
     </Points>
   );
 };
 
 export default DNAHelix3D;
-
-
-
-
-
-

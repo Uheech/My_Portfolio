@@ -5,6 +5,17 @@ import ProjectReport from './components/ProjectReport';
 
 function App() {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [wasInDetail, setWasInDetail] = useState(false);
+
+  const handleSelect = (id) => {
+    setSelectedProjectId(id);
+    setWasInDetail(false);
+  };
+
+  const handleBack = () => {
+    setSelectedProjectId(null);
+    setWasInDetail(true);
+  };
 
   return (
     <div className="min-h-screen bg-white text-lab-dark font-mono selection:bg-lab-dark selection:text-white relative">
@@ -17,22 +28,24 @@ function App() {
             key="main"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
-            transition={{ duration: 0.6, ease: [0.43, 0.13, 0.23, 0.96] }}
+            exit={{ opacity: 0, transition: { duration: 0.1 } }} // MainView의 자체 애니메이션 이후 즉시 교체
           >
-            <MainView onSelectProject={setSelectedProjectId} />
+            <MainView 
+              onSelectProject={handleSelect} 
+              isReturning={wasInDetail} 
+            />
           </motion.div>
         ) : (
           <motion.div
             key="detail"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 100 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <ProjectReport 
               projectId={selectedProjectId} 
-              onBack={() => setSelectedProjectId(null)} 
+              onBack={handleBack} 
             />
           </motion.div>
         )}
