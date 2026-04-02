@@ -34,26 +34,26 @@ const ProjectReport = ({ projectId, onBack }) => {
 
   const sections = [
     { 
-      label: 'PROBLEM / BACKGROUND', 
+      label: '문제 정의 / 배경', 
       id: '01', 
       icon: <Search size={18} />, 
       content: project.problemBackground 
     },
     { 
-      label: 'HYPOTHESIS / LOGIC DESIGN', 
+      label: '가설 설정 / 로직 설계', 
       id: '02', 
       icon: <Cpu size={18} />, 
       content: project.hypothesisLogic 
     },
     { 
-      label: 'METHODOLOGY & QA', 
+      label: '방법론 & QA', 
       id: '03', 
       icon: <ShieldCheck size={18} />, 
       content: project.methodologyQA.methodology,
       qaPoint: project.methodologyQA.qaPoint 
     },
     { 
-      label: 'INSIGHT & IMPACT', 
+      label: '인사이트 & 기대 효과', 
       id: '04', 
       icon: <TrendingUp size={18} />, 
       content: project.insightImpact 
@@ -83,7 +83,7 @@ const ProjectReport = ({ projectId, onBack }) => {
             className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-lab-dark hover:text-white px-4 py-2 border-2 border-lab-dark transition-all w-fit"
           >
             <ArrowLeft size={14} />
-            <span>[ ← RETURN_TO_ARCHIVE ]</span>
+            <span>[ ← 메인으로 돌아가기 ]</span>
           </button>
           
           <div className="flex flex-col">
@@ -96,23 +96,23 @@ const ProjectReport = ({ projectId, onBack }) => {
 
         <div className="grid grid-cols-2 gap-x-10 gap-y-4 w-full md:w-fit px-0 md:px-8 border-l-0 md:border-l-2 border-lab-dark/10">
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">TS_VERIFY</span>
+            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">분석 일자</span>
             <span className="text-xs font-black">{analysisDate}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">STATUS</span>
+            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">분석 상태</span>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-neon-a animate-pulse" />
-              <span className="text-[10px] font-black text-neon-a bg-lab-dark px-2 py-0.5" style={{ background: '#000' }}>VERIFIED</span>
+              <span className="text-[10px] font-black text-neon-a bg-lab-dark px-2 py-0.5" style={{ background: '#000' }}>검증됨</span>
             </div>
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">SEQUENCE_ID</span>
-            <span className="text-xs font-black" style={{ color: project.color }}>#{project.type}_{project.id} // LOG</span>
+            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">시퀀스 코드</span>
+            <span className="text-xs font-black" style={{ color: project.color }}>#{project.type}_{project.id}</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">HEAD_ANALYST</span>
-            <span className="text-xs font-black">UHEECH_LAB</span>
+            <span className="text-[9px] font-bold opacity-30 uppercase tracking-widest">책임 분석자</span>
+            <span className="text-xs font-black">최유희 (UHEECH)</span>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ const ProjectReport = ({ projectId, onBack }) => {
           <div className="flex flex-col gap-6 flex-1">
             <div className="flex items-center gap-3">
               <Dna size={18} style={{ color: project.color }} />
-              <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-60 italic">[ PROJECT_OVERVIEW ]</span>
+              <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-60 italic">[ 프로젝트 개요 ]</span>
             </div>
             <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-none uppercase">
               {project.title}

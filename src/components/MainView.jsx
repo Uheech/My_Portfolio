@@ -2,22 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import DNAHelix3D from './DNAHelix3D';
 import ProfileDashboard from './ProfileDashboard';
-import { UserCircle2 } from 'lucide-react';
+import { UserCircle2, Fingerprint } from 'lucide-react';
 
 const MainView = ({ onSelectProject, isReturning = false }) => {
-  const [timestamp, setTimestamp] = useState('');
   const [transitionPhase, setTransitionPhase] = useState(isReturning ? 'shrink' : 'idle');
   const [showProfile, setShowProfile] = useState(false);
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setTimestamp(now.toISOString().replace('T', ' ').substring(0, 19) + 'Z');
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (isReturning) {
@@ -39,177 +28,155 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="h-screen w-full flex flex-row items-center justify-center p-8 bg-lab-bg overflow-hidden relative font-mono"
-      animate={{ 
+      animate={{
         filter: transitionPhase === 'focus' ? 'blur(8px)' : 'blur(0px)',
         scale: transitionPhase === 'focus' ? 1.05 : 1
       }}
       transition={{ duration: 0.8 }}
     >
-      {/* Background Decoration */}
-      <div className="scan-line" />
-      <DataStream opacity={showProfile ? 0.01 : 0.03} />
-      
       {/* Profile Dashboard Component */}
       <ProfileDashboard isOpen={showProfile} onClose={() => setShowProfile(false)} />
 
-      {/* Top Left Info */}
-      <motion.div 
-        className="absolute top-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark pl-4 z-20"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ 
-          opacity: transitionPhase === 'idle' ? 1 : 0, 
-          x: transitionPhase === 'idle' ? 0 : -20 
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-neon-a animate-pulse" />
-          <span className="text-[10px] font-bold tracking-[0.2em]">STATION_ACTIVE</span>
-        </div>
-        <span className="text-[9px] text-lab-dark/40">{timestamp}</span>
-      </motion.div>
-
-      {/* Top Right Info */}
-      <motion.div 
-        className="absolute top-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark pr-4 z-20"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ 
-          opacity: transitionPhase === 'idle' ? 1 : 0, 
-          x: transitionPhase === 'idle' ? (showProfile ? 20 : 0) : 20 
-        }}
-      >
-        <span className="text-[10px] font-bold tracking-[0.2em]">LAB_ARCHIVE_V3</span>
-        <span className="text-[9px] text-lab-dark/40">LAT: 37.5665 / LONG: 126.9780</span>
-      </motion.div>
-
-      {/* Left Content (Title) - Shifts right when profile is open */}
+      {/* TOP Technical Meta: Analysis_Report (Fixed to Right Edge) */}
       <motion.div
-        className="absolute left-24 flex flex-col gap-6 z-20 max-w-sm"
-        animate={{ 
-          opacity: transitionPhase === 'idle' ? (showProfile ? 0.3 : 1) : 0, 
-          x: transitionPhase === 'idle' ? (showProfile ? 540 : 0) : -40 
-        }}
-        transition={{ type: 'spring', damping: 25, stiffness: 100 }}
+        className="absolute top-8 right-8 text-right flex flex-col items-end z-20 pointer-events-none"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 0.4 : 0, y: (transitionPhase === 'idle' && !showProfile) ? 0 : -10 }}
       >
-        <div className="flex flex-col gap-3">
-          <motion.span 
-            className="text-[11px] tracking-[0.4em] text-lab-dark/30 uppercase font-black"
-          >
-            UHEECH_EXPERIMENTAL_STATION
-          </motion.span>
-          <h1 className="text-5xl font-black tracking-tighter text-lab-dark leading-[0.9]">
-            <span className="block mb-2">전공의 담장을</span>
-            <span className="block mb-2">허무는</span>
-            <span className="inline-block bg-lab-dark text-white px-3 py-1 transform -skew-x-6 text-4xl">
-              잡식성 해결사
-            </span>
-          </h1>
-        </div>
-        <p className="text-[10px] opacity-40 tracking-[0.3em] font-bold uppercase leading-relaxed">
-          The Omnivorous Fixer<br/>Digital Blueprint v3.0 // Archive
-        </p>
-
-        <div className="mt-8 flex flex-col gap-3">
-          <div className="w-12 h-[1px] bg-lab-dark/20" />
-          <p className="text-[9px] text-lab-dark/40 leading-relaxed uppercase tracking-widest">
-            Cross-disciplinary problem solving<br/>
-            through biological logic and engineering.
-          </p>
-        </div>
-
-        {/* Profile Entry Point */}
-        <motion.button
-          onClick={() => setShowProfile(true)}
-          className="mt-6 flex items-center gap-3 w-fit group border-b border-transparent hover:border-lab-dark transition-all"
-        >
-          <div className="p-2 border-2 border-lab-dark rounded-full group-hover:bg-lab-dark group-hover:text-white transition-all">
-            <UserCircle2 size={16} />
-          </div>
-          <span className="text-[10px] font-black tracking-widest uppercase">[ ACCESS_ANALYST_ID ]</span>
-        </motion.button>
       </motion.div>
 
-      {/* Center: DNA Helix (Real 3D) - Shifts right when profile is open */}
-      <motion.div 
-        className="z-10 w-full h-full flex items-center justify-center relative"
+      {/* MAIN ALIGNMENT CONTAINER: Left-Aligned Vertical Grid (7xl) */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center pointer-events-none">
+        <div className="w-full max-w-7xl h-full flex flex-col justify-between py-16 px-8 relative">
+
+          {/* 1. TOP CENTER -> TOP LEFT Alignment Sync */}
+          <motion.div
+            className="flex flex-col items-start pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 1 : 0 }}
+          >
+            <span className="text-[15px] tracking-[0.6em] text-lab-dark/30 uppercase font-black">
+              유희'S GENE LAB
+            </span>
+          </motion.div>
+
+          {/* 2. MIDDLE HERO SECTION (Existing Content) */}
+          <div className="flex flex-row items-center gap-16 w-full">
+            <motion.div
+              className="flex flex-col gap-6 max-w-sm pointer-events-none"
+              animate={{
+                opacity: transitionPhase === 'idle' ? (showProfile ? 0.3 : 1) : 0,
+                x: transitionPhase === 'idle' ? (showProfile ? 350 : 0) : -40
+              }}
+              transition={{ type: 'spring', damping: 25, stiffness: 100 }}
+            >
+              <div className="flex flex-col gap-12">
+                <div className="flex flex-col gap-6 pointer-events-auto">
+                  <div className="flex flex-col gap-6">
+                    <h1 className="text-6xl font-black tracking-tighter text-lab-dark leading-[1.0]">
+                      분야를 불문하고<br />
+                      직접 부딪히는
+                    </h1>
+                    <div className="flex items-center gap-3">
+                      <div className="h-[2px] w-8 bg-lab-dark" />
+                      <p className="text-2xl font-black text-lab-dark tracking-tighter flex items-center">
+                        데이터 분석가, <span className="bg-lab-dark text-white px-3 py-1 ml-2 inline-block">최유희</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pl-0 pointer-events-auto">
+                  <p className="text-[15px] text-lab-dark/80 tracking-tight font-semibold leading-relaxed">
+                    {`사람을 위한 기술을 고민하며`}<br />
+                    {`그 기술로 누군가의 갈증을 채울 때, 큰 기쁨을 느낍니다. `}
+                  </p>
+                </div>
+              </div>
+
+              <motion.button
+                onClick={() => setShowProfile(true)}
+                className="mt-8 flex items-center gap-4 w-fit group pointer-events-auto z-40"
+              >
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-neon-a/20 rounded-full blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                  <div className="relative p-2.5 border-2 border-[#333] rounded-full group-hover:bg-[#333] group-hover:text-white transition-all bg-lab-bg flex items-center justify-center">
+                    <Fingerprint size={20} className={showProfile ? "text-neon-a" : ""} />
+                  </div>
+                </div>
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className="text-[8px] font-black tracking-[0.3em] text-[#333]/40 uppercase">LAB_ACCESS_SCANNER</span>
+                  <span className="text-sm font-black tracking-[0.2em] text-[#333]">[ 프로필 ]</span>
+                </div>
+              </motion.button>
+            </motion.div>
+
+            {/* Layout Spacer for DNA */}
+            <div className="flex-1 pointer-events-none" />
+          </div>
+
+          {/* 3. BOTTOM ALIGNMENT: Instructions Sync */}
+          <motion.div
+            className="flex flex-col items-start gap-3 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 1 : 0 }}
+          >
+            <div className="flex flex-col items-start gap-1.5">
+              <div className="flex items-center gap-3">
+                <span className="text-lab-dark animate-pulse font-mono text-xl">{`> `}</span>
+                <p className="text-lg font-black text-lab-dark tracking-tight">
+                  나를 구성하는 유전 코드를 확인해보세요.
+                  <motion.span
+                    animate={{ opacity: [1, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                    className="inline-block ml-1 w-2.5 h-5 bg-lab-dark align-middle"
+                  />
+                </p>
+              </div>
+              <p className="text-xs font-bold text-lab-dark/40 tracking-wider">
+                각 노드를 클릭하면 프로젝트 상세 데이터를 확인할 수 있습니다.
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* DNA Helix Layer: Restored Behind Text Alignment Container */}
+      <motion.div
+        className="absolute inset-0 z-10 select-none"
         animate={{
           opacity: transitionPhase === 'shrink' ? 0 : (showProfile ? 0.8 : 1),
           scale: transitionPhase === 'shrink' ? 0.8 : (showProfile ? 0.9 : 1),
-          x: showProfile ? 300 : 0
+          x: showProfile ? 450 : 350 // Right-shifted position for visual balance with left text
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 100 }}
       >
         <DNAHelix3D onSelect={handleSelect} transitionPhase={transitionPhase} />
       </motion.div>
 
-      {/* Bottom Center Prompt */}
-      <motion.div
-        className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 1 : 0 }}
-      >
-        <p className="text-[9px] uppercase tracking-[0.4em] font-black text-lab-dark/30 animate-pulse">
-          Select_Sequence_to_Analyze
-        </p>
-        <div className="w-[1px] h-8 bg-gradient-to-b from-lab-dark/0 via-lab-dark/20 to-lab-dark/0" />
-      </motion.div>
 
-      {/* Footer info labels */}
-      <motion.div 
+      {/* Left/Right Border Decor (Optional) */}
+      <motion.div
         className="absolute bottom-8 left-8 flex flex-col gap-1 border-l-2 border-lab-dark/10 pl-4 z-20"
-        animate={{ 
+        animate={{
           opacity: transitionPhase === 'idle' ? 1 : 0,
           x: showProfile ? -20 : 0
         }}
       >
-        <span className="text-[10px] text-lab-dark/40 tracking-[0.2em] font-black uppercase">MEMORY_DUMP: 0X4F2A...</span>
-        <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">System_Log::Init_Success</span>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         className="absolute bottom-8 right-8 text-right flex flex-col gap-1 border-r-2 border-lab-dark/10 pr-4 z-20"
-        animate={{ 
+        animate={{
           opacity: transitionPhase === 'idle' ? 1 : 0,
           x: showProfile ? 20 : 0
         }}
       >
-        <span className="text-[10px] text-lab-dark/60 tracking-[0.2em] font-black uppercase">BUILT WITH LOGIC & CREATIVITY</span>
-        <span className="text-[9px] text-lab-dark/20 uppercase tracking-[0.1em]">Verification_Key::7771-NX</span>
       </motion.div>
     </motion.div>
   );
 };
 
-
-// Subtle background data stream component
-const DataStream = () => {
-  const streams = Array.from({ length: 15 });
-  
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03] flex justify-around">
-      {streams.map((_, i) => (
-        <motion.div
-          key={i}
-          className="text-[10px] font-mono whitespace-nowrap orientation-vertical writing-mode-vertical"
-          initial={{ y: -500 }}
-          animate={{ y: 1000 }}
-          transition={{
-            duration: 15 + Math.random() * 15,
-            repeat: Infinity,
-            ease: "linear",
-            delay: Math.random() * 10
-          }}
-        >
-          {Array.from({ length: 40 }).map(() => 
-            Math.floor(Math.random() * 16).toString(16).toUpperCase()
-          ).join('')}
-        </motion.div>
-      ))}
-    </div>
-  );
-};
-
-
 export default MainView;
-

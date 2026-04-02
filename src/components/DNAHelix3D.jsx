@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { PerspectiveCamera, Points, PointMaterial, Text, Billboard } from '@react-three/drei';
+import { PerspectiveCamera, Points, PointMaterial, Billboard, useCursor } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import BlurredText from './BlurredText';
 
 const DNAHelix3D = ({ onSelect, transitionPhase = 'idle' }) => {
   return (
@@ -36,6 +37,9 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   const groupRef = useRef();
   const [hoveredRung, setHoveredRung] = useState(null);
 
+  // 노드 호버 시 사용자가 제공한 볼드한 돋보기(custom-magnifier)로 변경
+  useCursor(!!hoveredRung, "url('/src/assets/custom-magnifier.svg') 20 20, zoom-in", "crosshair");
+
   const wavelength = 8;
   const amplitude = 3.6;
   const height = 18;
@@ -43,10 +47,10 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   const totalRungs = 60; // 밀도 추가 상향 (약 60개)
 
   const interactiveRungs = [
-    { id: 'BIO', yIndex: 12, color: '#2ECC71' },
-    { id: 'MUSIC', yIndex: 20, color: '#A569BD' },
-    { id: 'MENTAL', yIndex: 28, color: '#EC4899' },
-    { id: 'DATA/QA', yIndex: 36, color: '#0EA5E9' }
+    { id: 'BIO', yIndex: 16, color: '#2ECC71' },
+    { id: 'MUSIC', yIndex: 24, color: '#A569BD' },
+    { id: 'MENTAL', yIndex: 32, color: '#EC4899' },
+    { id: 'QA', yIndex: 40, color: '#0EA5E9' }
   ];
 
   // 더 세련된 테크니컬 필러 컬러 팔레트
@@ -133,6 +137,10 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
 };
 
 const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover, onSelect, targetOpacity, isInteractive }) => {
+  const meshRef = useRef();
+  const billboardRef = useRef();
+  const [blurAmount, setBlurAmount] = useState(0);
+
   const p1 = new THREE.Vector3(amplitude * Math.sin(phi), y, amplitude * Math.cos(phi));
   const p2 = new THREE.Vector3(amplitude * Math.sin(phi + Math.PI), y, amplitude * Math.cos(phi + Math.PI));
   const mid = new THREE.Vector3().lerpVectors(p1, p2, 0.5);
@@ -142,6 +150,20 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
   const gap = isHovered ? 0.05 : 0.65;
   const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.5;
   const lineWidth = isInteractive ? (isHovered ? 0.08 : 0.04) : 0.03;
+
+  // 실시간 Z-depth 기반 '진짜 블러' 강도 계산
+  useFrame(() => {
+    if (billboardRef.current) {
+      const worldPos = new THREE.Vector3();
+      billboardRef.current.getWorldPosition(worldPos);
+      
+      // Z축 깊이에 따라 블러 강도(px) 조절
+      // 앞쪽일수록 0px(선명), 뒤쪽일수록 최대 14px(흐릿)하게 매핑
+      const normalizedZ = (worldPos.z + 6.5) / 13;
+      const calcBlur = Math.max(0, (1 - normalizedZ) * 14); 
+      setBlurAmount(calcBlur);
+    }
+  });
 
   return (
     <group
@@ -182,17 +204,17 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
       </group>
 
       {isInteractive && (
-        <Billboard position={[amplitude * Math.sin(phi) * 1.8, y, amplitude * Math.cos(phi) * 1.8]}>
-          <Text
-            fontSize={0.8}
+        <Billboard 
+          ref={billboardRef}
+          position={[amplitude * Math.sin(phi) * 1.8, y, amplitude * Math.cos(phi) * 1.8]}
+        >
+          <BlurredText 
+            text={metadata.id}
             color={color}
-            anchorX="center"
-            anchorY="middle"
+            blurAmount={blurAmount}
+            opacity={targetOpacity}
             scale={isHovered ? 1.4 : 1}
-            fillOpacity={targetOpacity}
-          >
-            {metadata.id}
-          </Text>
+          />
         </Billboard>
       )}
     </group>
