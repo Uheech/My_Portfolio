@@ -69,76 +69,71 @@ const ProfileDashboard = ({ isOpen, onClose }) => {
               </button>
             </div>
 
-            {/* Content Body */}
-            <div className="flex flex-col gap-10">
-              {/* Introduction */}
-              <SectionWrapper title="IDENTITY_PURPOSE" icon={<User size={16} />}>
-                <p className="text-[14px] leading-relaxed font-bold text-lab-dark/80 text-justify border-l-4 border-lab-dark pl-4">
-                  {personalInfo.identity.bio}
-                </p>
-                <div className="mt-4 flex gap-4 text-[9px] font-black opacity-40 italic">
-                   <span>LOC: {personalInfo.identity.location}</span>
-                   <span>ST: {personalInfo.identity.status}</span>
+            {/* Content Body with Coming Soon Overlay */}
+            <div className="flex flex-col gap-10 relative">
+              {/* Coming Soon Overlay */}
+              <div className="absolute inset-0 z-20 backdrop-blur-md bg-lab-bg/40 flex items-center justify-center -mx-4">
+                <div className="flex flex-col items-center gap-6 p-10 border-2 border-lab-dark bg-white shadow-2xl transform -rotate-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-lab-dark animate-ping" />
+                    <span className="text-xl font-black tracking-[0.3em] uppercase">준비중입니다</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1 opacity-60">
+                    <span className="text-[10px] font-mono tracking-widest text-lab-dark">STATUS: ACCESS_RESTRICTED</span>
+                    <span className="text-[10px] font-mono tracking-widest text-lab-dark uppercase">Expected_Update: Q3_2026</span>
+                  </div>
+                  <div className="w-full h-[1px] bg-lab-dark/10" />
+                  <p className="text-[11px] font-medium text-center text-lab-dark/60 leading-relaxed">
+                    현재 데이터 아카이빙 작업 중입니다.<br/>
+                    곧 상세한 이력을 확인하실 수 있습니다.
+                  </p>
                 </div>
-              </SectionWrapper>
+              </div>
 
-              {/* Core Expertise / Radar Style Indicators */}
-              <SectionWrapper title="CORE_COMPETENCIES" icon={<Target size={16} />}>
-                <div className="flex flex-col gap-4">
-                  {personalInfo.expertise.map((exp, i) => (
-                    <div key={i} className="flex flex-col gap-1.5">
-                      <div className="flex justify-between text-[11px] font-black">
-                        <span>{exp.skill}</span>
-                        <span className="text-neon-a">{exp.level}%</span>
-                      </div>
-                      <div className="w-full h-1 bg-lab-dark/10 relative">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${exp.level}%` }}
-                          transition={{ duration: 1, delay: 0.5 + i * 0.1 }}
-                          className={`h-full ${exp.type === 'CORE' ? 'bg-lab-dark' : 'bg-lab-dark/40'}`} 
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </SectionWrapper>
-
-              {/* Career Log */}
-              <SectionWrapper title="EXPERIENCE_CHRONICLE" icon={<Briefcase size={16} />}>
-                <div className="flex flex-col gap-6">
-                  {personalInfo.career.map((job, i) => (
-                    <div key={i} className="border-l-2 border-lab-dark/20 pl-6 relative">
-                      <div className="absolute left-[-5px] top-1.5 w-2 h-2 rounded-full bg-lab-dark" />
-                      <div className="flex justify-between items-baseline mb-1">
-                        <h4 className="text-sm font-black uppercase text-lab-dark">{job.role}</h4>
-                        <span className="text-[10px] font-bold opacity-40">{job.period}</span>
-                      </div>
-                      <div className="text-[11px] font-black text-neon-p mb-2">{job.company}</div>
-                      <p className="text-[12px] opacity-70 leading-relaxed italic">{job.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </SectionWrapper>
-
-              {/* Academic & Credentials */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <SectionWrapper title="ACADEMIC" icon={<GraduationCap size={16} />}>
-                  {personalInfo.education.map((edu, i) => (
-                    <div key={i} className="flex flex-col gap-1">
-                      <span className="text-[12px] font-black">{edu.school}</span>
-                      <span className="text-[10px] font-bold opacity-40 italic">{edu.degree}</span>
-                    </div>
-                  ))}
+              {/* Blurred Introduction */}
+              <div className="opacity-20 filter blur-[2px] pointer-events-none select-none">
+                <SectionWrapper title="IDENTITY_PURPOSE" icon={<User size={16} />}>
+                  <p className="text-[14px] leading-relaxed font-bold text-lab-dark/80 text-justify border-l-4 border-lab-dark pl-4">
+                    {personalInfo.identity.bio}
+                  </p>
+                  <div className="mt-4 flex gap-4 text-[9px] font-black opacity-40 italic">
+                     <span>LOC: {personalInfo.identity.location}</span>
+                     <span>ST: {personalInfo.identity.status}</span>
+                  </div>
                 </SectionWrapper>
-                <SectionWrapper title="CERTIFICATES" icon={<ShieldCheck size={16} />}>
-                   <div className="flex flex-wrap gap-2">
-                     {personalInfo.credentials.map((cert, i) => (
-                       <span key={i} className="text-[9px] font-black border border-lab-dark/20 px-2 py-0.5 hover:bg-lab-dark hover:text-white transition-all cursor-default">
-                         {cert.id}
-                       </span>
-                     ))}
-                   </div>
+  
+                {/* Core Expertise */}
+                <SectionWrapper title="CORE_COMPETENCIES" icon={<Target size={16} />}>
+                  <div className="flex flex-col gap-4">
+                    {personalInfo.expertise.map((exp, i) => (
+                      <div key={i} className="flex flex-col gap-1.5">
+                        <div className="flex justify-between text-[11px] font-black">
+                          <span>{exp.skill}</span>
+                          <span className="text-neon-a">??%</span>
+                        </div>
+                        <div className="w-full h-1 bg-lab-dark/10 relative">
+                          <div className="h-full bg-lab-dark/20 w-[30%]" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SectionWrapper>
+  
+                {/* Career Log */}
+                <SectionWrapper title="EXPERIENCE_CHRONICLE" icon={<Briefcase size={16} />}>
+                  <div className="flex flex-col gap-6 text-transparent bg-clip-text bg-gradient-to-b from-lab-dark to-transparent">
+                    {personalInfo.career.slice(0, 1).map((job, i) => (
+                      <div key={i} className="border-l-2 border-lab-dark/20 pl-6 relative">
+                        <div className="absolute left-[-5px] top-1.5 w-2 h-2 rounded-full bg-lab-dark" />
+                        <div className="flex justify-between items-baseline mb-1">
+                          <h4 className="text-sm font-black uppercase text-lab-dark">ROLE_TITLE_ENCRYPTED</h4>
+                          <span className="text-[10px] font-bold opacity-40">20XX - 20XX</span>
+                        </div>
+                        <div className="text-[11px] font-black text-neon-p mb-2">COMPANY_HIDDEN</div>
+                        <p className="text-[12px] opacity-70 leading-relaxed italic">Data access is restricted for this section...</p>
+                      </div>
+                    ))}
+                  </div>
                 </SectionWrapper>
               </div>
             </div>

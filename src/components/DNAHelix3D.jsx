@@ -47,10 +47,10 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   const totalRungs = 60; // 밀도 추가 상향 (약 60개)
 
   const interactiveRungs = [
-    { id: 'BIO', yIndex: 16, color: '#2ECC71' },
-    { id: 'MUSIC', yIndex: 24, color: '#A569BD' },
-    { id: 'MENTAL', yIndex: 32, color: '#EC4899' },
-    { id: 'QA', yIndex: 40, color: '#0EA5E9' }
+    { id: 'BIO', yIndex: 20, color: '#2ECC71' },
+    { id: 'MUSIC', yIndex: 28, color: '#A569BD' },
+    { id: 'MENTAL', yIndex: 36, color: '#EC4899' },
+    { id: 'DATA/QA', yIndex: 44, color: '#0EA5E9' }
   ];
 
   // 더 세련된 테크니컬 필러 컬러 팔레트
@@ -58,6 +58,7 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
 
   const targetScale = useRef(1);
   const targetOpacity = useRef(1);
+  const currentOpacity = useRef(1);
 
   useEffect(() => {
     if (transitionPhase === 'focus') {
@@ -92,7 +93,28 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   useFrame((state, delta) => {
     const time = state.clock.getElapsedTime();
     if (groupRef.current) {
+      // 1. Scale Lerping
       groupRef.current.scale.lerp(new THREE.Vector3(targetScale.current, targetScale.current, targetScale.current), delta * 4);
+      
+      // 2. Opacity Lerping (Core Fix for Visibility Bug)
+      currentOpacity.current = THREE.MathUtils.lerp(currentOpacity.current, targetOpacity.current, delta * 4);
+      
+      // 모든 하위 머티리얼 순회하며 오피시티 동적 업데이트 (리렌더링 없이 반영)
+      groupRef.current.traverse((child) => {
+        if (child.material) {
+          // 배경 코어(A/B) 오피시티 보정
+          if (child.isPoints) {
+            child.material.opacity = currentOpacity.current * 0.45;
+          } 
+          // 런(Rung) 및 텍스트 박스 오피시티 보정
+          else if (child.material.opacity !== undefined) {
+             // 개별 컴포넌트 내부에서 lineOpacity 등의 추가 연산이 있으나, 
+             // 최상위 보간값을 곱해줌으로써 최종 가시성 동적 제어
+             // (이곳에서 직접 대입하거나, children component가 currentOpacity.current를 참조하게 함)
+          }
+        }
+      });
+
       groupRef.current.rotation.y = time * 0.32;
       groupRef.current.position.y = Math.sin(time * 0.4) * 0.15;
     }
@@ -101,14 +123,13 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   return (
     <group ref={groupRef}>
       <Points positions={backbonePositions.posA} stride={3}>
-        <PointMaterial transparent color="#1e293b" size={0.06} sizeAttenuation={true} depthWrite={false} opacity={targetOpacity.current * 0.45} />
+        <PointMaterial transparent color="#1e293b" size={0.06} sizeAttenuation={true} depthWrite={false} opacity={0.45} />
       </Points>
       <Points positions={backbonePositions.posB} stride={3}>
-        <PointMaterial transparent color="#1e293b" size={0.06} sizeAttenuation={true} depthWrite={false} opacity={targetOpacity.current * 0.45} />
+        <PointMaterial transparent color="#1e293b" size={0.06} sizeAttenuation={true} depthWrite={false} opacity={0.45} />
       </Points>
 
       {Array.from({ length: totalRungs }).map((_, i) => {
-        // 인터랙티브 노드 간격(8)의 절반인 4단위로 노드 배치 (i: 0, 4, 8, 12, 16, 20, 24...)
         if ((i - 4) % 4 !== 0) return null;
 
         const y = (i / totalRungs) * height - height / 2;
@@ -127,7 +148,7 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
             isHovered={interaction ? hoveredRung === interaction.id : false}
             onHover={setHoveredRung}
             onSelect={onSelect}
-            targetOpacity={targetOpacity.current}
+            currentOpacityRef={currentOpacity}
             isInteractive={!!interaction}
           />
         );
@@ -136,9 +157,11 @@ const DNAStructure = ({ onSelect, transitionPhase }) => {
   );
 };
 
-const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover, onSelect, targetOpacity, isInteractive }) => {
+const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover, onSelect, currentOpacityRef, isInteractive }) => {
   const meshRef = useRef();
   const billboardRef = useRef();
+  const lineMeshRef = useRef();
+  const grayMeshRef = useRef();
   const [blurAmount, setBlurAmount] = useState(0);
 
   const p1 = new THREE.Vector3(amplitude * Math.sin(phi), y, amplitude * Math.cos(phi));
@@ -148,20 +171,25 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
   const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
 
   const gap = isHovered ? 0.05 : 0.65;
-  const lineOpacity = isInteractive ? targetOpacity : targetOpacity * 0.5;
   const lineWidth = isInteractive ? (isHovered ? 0.08 : 0.04) : 0.03;
 
-  // 실시간 Z-depth 기반 '진짜 블러' 강도 계산
+  // 실시간 Z-depth 기반 '진짜 블러' 강도 계산 및 오피시티 동적 보정
   useFrame(() => {
     if (billboardRef.current) {
       const worldPos = new THREE.Vector3();
       billboardRef.current.getWorldPosition(worldPos);
-      
-      // Z축 깊이에 따라 블러 강도(px) 조절
-      // 앞쪽일수록 0px(선명), 뒤쪽일수록 최대 14px(흐릿)하게 매핑
       const normalizedZ = (worldPos.z + 6.5) / 13;
-      const calcBlur = Math.max(0, (1 - normalizedZ) * 14); 
+      const calcBlur = Math.max(0, (1 - normalizedZ) * 14);
       setBlurAmount(calcBlur);
+    }
+
+    // 머티리얼 오피시티 프레임 단위 동기화 (리렌더링 없이 즉시 반영)
+    const baseOpacity = currentOpacityRef.current;
+    if (lineMeshRef.current) {
+      lineMeshRef.current.material.opacity = isInteractive ? baseOpacity : baseOpacity * 0.5;
+    }
+    if (grayMeshRef.current) {
+      grayMeshRef.current.material.opacity = isInteractive ? baseOpacity * 0.5 : baseOpacity * 0.5;
     }
   });
 
@@ -179,24 +207,22 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
       )}
 
       <group position={mid} quaternion={quaternion}>
-        {/* p1 방향 메쉬 (텍스트 쪽): 형광색 적용 및 인터랙티브 전용 굵기 유지 */}
-        <mesh position={[0, (gap / 2 + (amplitude - gap / 2) / 2), 0]}>
+        <mesh ref={lineMeshRef} position={[0, (gap / 2 + (amplitude - gap / 2) / 2), 0]}>
           <cylinderGeometry args={[lineWidth, lineWidth, (amplitude - gap / 2), 8]} />
           <meshStandardMaterial
             color={color}
             transparent
-            opacity={lineOpacity}
+            opacity={0} // useFrame에서 업데이트됨
             emissive={color}
             emissiveIntensity={isInteractive ? 0.5 : 0}
           />
         </mesh>
-        {/* p2 방향 메쉬 (반대쪽): 항상 회색 적용 및 배경 노드와 동일한 굵기(0.03) 적용 */}
-        <mesh position={[0, -(gap / 2 + (amplitude - gap / 2) / 2), 0]}>
+        <mesh ref={grayMeshRef} position={[0, -(gap / 2 + (amplitude - gap / 2) / 2), 0]}>
           <cylinderGeometry args={[0.03, 0.03, (amplitude - gap / 2), 8]} />
           <meshStandardMaterial
             color={isInteractive ? "#94a3b8" : color}
             transparent
-            opacity={isInteractive ? targetOpacity * 0.5 : lineOpacity}
+            opacity={0} // useFrame에서 업데이트됨
             emissive="#94a3b8"
             emissiveIntensity={0}
           />
@@ -204,15 +230,15 @@ const RungSolidLine = ({ y, phi, amplitude, metadata, color, isHovered, onHover,
       </group>
 
       {isInteractive && (
-        <Billboard 
+        <Billboard
           ref={billboardRef}
-          position={[amplitude * Math.sin(phi) * 1.8, y, amplitude * Math.cos(phi) * 1.8]}
+          position={[amplitude * Math.sin(phi) * 1.5, y, amplitude * Math.cos(phi) * 1.5]}
         >
-          <BlurredText 
+          <BlurredText
             text={metadata.id}
             color={color}
             blurAmount={blurAmount}
-            opacity={targetOpacity}
+            opacity={currentOpacityRef.current} // BlurredText는 React 컴포넌트이므로 리렌더링 시 반영됨
             scale={isHovered ? 1.4 : 1}
           />
         </Billboard>

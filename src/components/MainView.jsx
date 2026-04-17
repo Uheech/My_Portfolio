@@ -149,7 +149,7 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
         animate={{
           opacity: transitionPhase === 'shrink' ? 0 : (showProfile ? 0.8 : 1),
           scale: transitionPhase === 'shrink' ? 0.8 : (showProfile ? 0.9 : 1),
-          x: showProfile ? 450 : 350 // Right-shifted position for visual balance with left text
+          x: showProfile ? 450 : 300 // Right-shifted position for visual balance with left text
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 100 }}
       >
