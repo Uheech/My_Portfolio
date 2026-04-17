@@ -65,7 +65,7 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
           {/* 2. MIDDLE HERO SECTION (Existing Content) */}
           <div className="flex flex-row items-center gap-16 w-full">
             <motion.div
-              className="flex flex-col gap-6 max-w-sm pointer-events-none"
+              className="flex flex-col gap-6 max-w-2xl pointer-events-none"
               animate={{
                 opacity: transitionPhase === 'idle' ? (showProfile ? 0.3 : 1) : 0,
                 x: transitionPhase === 'idle' ? (showProfile ? 350 : 0) : -40
@@ -81,8 +81,8 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
                     </h1>
                     <div className="flex items-center gap-3">
                       <div className="h-[2px] w-8 bg-lab-dark" />
-                      <p className="text-2xl font-black text-lab-dark tracking-tighter flex items-center">
-                        데이터 분석가, <span className="bg-lab-dark text-white px-3 py-1 ml-2 inline-block">최유희</span>
+                      <p className="text-2xl font-black text-lab-dark tracking-tighter flex items-center whitespace-nowrap">
+                        AI & Data Strategist, <span className="bg-lab-dark text-white px-5 py-1 ml-3 inline-block">최유희</span>
                       </p>
                     </div>
                   </div>

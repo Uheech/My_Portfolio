@@ -2,8 +2,8 @@ export const personalInfo = {
   identity: {
     name: 'UHEECH',
     fullName: 'Uheech Lab Analyst',
-    title: 'Data Analyst with QA Strategy',
-    bio: '데이터 전주기의 무결성을 보증하고 비즈니스 지표의 신뢰 임계점을 확보하는 "잡식성 해결사" 분석가입니다. QA 엔지니어링 경험을 바탕으로 시스템 설계 단계부터 데이터 정합성을 고려한 분석 파이프라인을 구축합니다.',
+    title: 'AI & Data Strategist',
+    bio: '데이터 전주기의 무결성 위에서 AI와 전략적 분석을 통해 비즈니스 해답을 "빌드(Build)"하는 기술 전략가입니다. 정교한 데이터 분석과 최신 AI 기술을 결합하여 가설을 검증하고, 누군가의 갈증을 채울 수 있는 실질적인 해결책을 제시하는 데 집중합니다.',
     location: 'Seoul, South Korea (LAT: 37.5665 / LONG: 126.9780)',
     status: 'ACTIVE_FOR_OPPORTUNITIES'
   },
