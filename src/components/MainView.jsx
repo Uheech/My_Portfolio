@@ -7,6 +7,15 @@ import { UserCircle2, Fingerprint } from 'lucide-react';
 const MainView = ({ onSelectProject, isReturning = false }) => {
   const [transitionPhase, setTransitionPhase] = useState(isReturning ? 'shrink' : 'idle');
   const [showProfile, setShowProfile] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth < 768;
 
   useEffect(() => {
     if (isReturning) {
@@ -29,7 +38,7 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
 
   return (
     <motion.div
-      className="h-screen w-full flex flex-row items-center justify-center p-8 bg-lab-bg overflow-hidden relative font-mono"
+      className="min-h-screen w-full flex flex-col md:flex-row items-center justify-center p-6 md:p-8 bg-lab-bg overflow-x-hidden overflow-y-auto md:overflow-hidden relative font-mono"
       animate={{
         filter: transitionPhase === 'focus' ? 'blur(8px)' : 'blur(0px)',
         scale: transitionPhase === 'focus' ? 1.05 : 1
@@ -63,26 +72,27 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
           </motion.div>
 
           {/* 2. MIDDLE HERO SECTION (Existing Content) */}
-          <div className="flex flex-row items-center gap-16 w-full">
+          <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16 w-full">
             <motion.div
-              className="flex flex-col gap-6 max-w-2xl pointer-events-none"
+              className="flex flex-col gap-6 max-w-2xl pointer-events-none z-30"
               animate={{
                 opacity: transitionPhase === 'idle' ? (showProfile ? 0.3 : 1) : 0,
-                x: transitionPhase === 'idle' ? (showProfile ? 350 : 0) : -40
+                x: transitionPhase === 'idle' ? (showProfile ? (isMobile ? 0 : 350) : 0) : -40,
+                y: isMobile && showProfile ? -100 : 0
               }}
               transition={{ type: 'spring', damping: 25, stiffness: 100 }}
             >
-              <div className="flex flex-col gap-12">
+              <div className="flex flex-col gap-8 md:gap-12">
                 <div className="flex flex-col gap-6 pointer-events-auto">
-                  <div className="flex flex-col gap-6">
-                    <h1 className="text-6xl font-black tracking-tighter text-lab-dark leading-[1.0]">
+                  <div className="flex flex-col gap-4 md:gap-6">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter text-lab-dark leading-[1.1] md:leading-[1.0]">
                       분야를 불문하고<br />
                       직접 부딪히는
                     </h1>
                     <div className="flex items-center gap-3">
-                      <div className="h-[2px] w-8 bg-lab-dark" />
-                      <p className="text-2xl font-black text-lab-dark tracking-tighter flex items-center whitespace-nowrap">
-                        AI & Data Strategist, <span className="bg-lab-dark text-white px-5 py-1 ml-3 inline-block">최유희</span>
+                      <div className="h-[2px] w-6 md:w-8 bg-lab-dark" />
+                      <p className="text-lg sm:text-xl md:text-2xl font-black text-lab-dark tracking-tighter flex items-center whitespace-nowrap">
+                        AI & Data Strategist, <span className="bg-lab-dark text-white px-3 md:px-5 py-1 ml-2 md:ml-3 inline-block">최유희</span>
                       </p>
                     </div>
                   </div>
@@ -119,23 +129,23 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
 
           {/* 3. BOTTOM ALIGNMENT: Instructions Sync */}
           <motion.div
-            className="flex flex-col items-start gap-3 pointer-events-none"
+            className="flex flex-col items-start gap-3 pointer-events-none mt-10 md:mt-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: (transitionPhase === 'idle' && !showProfile) ? 1 : 0 }}
           >
             <div className="flex flex-col items-start gap-1.5">
               <div className="flex items-center gap-3">
-                <span className="text-lab-dark animate-pulse font-mono text-xl">{`> `}</span>
-                <p className="text-lg font-black text-lab-dark tracking-tight">
+                <span className="text-lab-dark animate-pulse font-mono text-base md:text-xl">{`> `}</span>
+                <p className="text-base md:text-lg font-black text-lab-dark tracking-tight">
                   나를 구성하는 유전 코드를 확인해보세요.
                   <motion.span
                     animate={{ opacity: [1, 0] }}
                     transition={{ repeat: Infinity, duration: 0.8 }}
-                    className="inline-block ml-1 w-2.5 h-5 bg-lab-dark align-middle"
+                    className="inline-block ml-1 w-2 h-4 md:w-2.5 md:h-5 bg-lab-dark align-middle"
                   />
                 </p>
               </div>
-              <p className="text-xs font-bold text-lab-dark/40 tracking-wider">
+              <p className="text-[10px] md:text-xs font-bold text-lab-dark/40 tracking-wider">
                 각 노드를 클릭하면 프로젝트 상세 데이터를 확인할 수 있습니다.
               </p>
             </div>
@@ -145,11 +155,12 @@ const MainView = ({ onSelectProject, isReturning = false }) => {
 
       {/* DNA Helix Layer: Restored Behind Text Alignment Container */}
       <motion.div
-        className="absolute inset-0 z-10 select-none"
+        className="absolute inset-0 z-10 select-none overflow-hidden"
         animate={{
-          opacity: transitionPhase === 'shrink' ? 0 : (showProfile ? 0.8 : 1),
-          scale: transitionPhase === 'shrink' ? 0.8 : (showProfile ? 0.9 : 1),
-          x: showProfile ? 450 : 300 // Right-shifted position for visual balance with left text
+          opacity: transitionPhase === 'shrink' ? 0 : (showProfile ? (isMobile ? 0.3 : 0.8) : 1),
+          scale: transitionPhase === 'shrink' ? 0.8 : (showProfile ? (isMobile ? 0.7 : 0.9) : 1),
+          x: isMobile ? 0 : (showProfile ? 450 : 300),
+          y: isMobile ? (showProfile ? 150 : 100) : 0
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 100 }}
       >

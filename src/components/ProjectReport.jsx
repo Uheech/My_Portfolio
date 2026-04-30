@@ -73,7 +73,7 @@ const ProjectReport = ({ projectId, onBack }) => {
   const analysisDate = new Date().toISOString().split('T')[0].replace(/-/g, '.');
 
   return (
-    <div className="min-h-screen bg-[#FBFBFA] p-6 md:p-12 lg:p-20 flex flex-col font-mono max-w-7xl mx-auto relative overflow-x-hidden paper-texture">
+    <div className="min-h-screen bg-[#FBFBFA] p-4 sm:p-8 md:p-12 lg:p-20 flex flex-col font-mono max-w-7xl mx-auto relative overflow-x-hidden paper-texture">
       {/* 🔬 LAB_SYSTEM_OVERLAYS */}
       <div className="fixed inset-0 pointer-events-none z-0 lab-grid opacity-30" />
       <div className="scan-line opacity-[0.02] pointer-events-none" />
@@ -111,7 +111,7 @@ const ProjectReport = ({ projectId, onBack }) => {
                 <Terminal size={48} />
               </div>
               <div className="flex flex-col gap-2">
-                <h2 className="text-5xl md:text-8xl font-black text-lab-dark tracking-tighter uppercase">
+                <h2 className="text-3xl sm:text-6xl md:text-8xl font-black text-lab-dark tracking-tighter uppercase">
                   준비중입니다
                 </h2>
                 <div className="flex items-center justify-center gap-4">
@@ -157,11 +157,11 @@ const ProjectReport = ({ projectId, onBack }) => {
             <div className="flex flex-col gap-10 relative z-10 max-w-5xl">
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col md:flex-row justify-between items-start gap-8 w-full">
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-[1.2] uppercase text-lab-dark text-left flex-1">
+                  <h2 className="text-xl sm:text-3xl md:text-5xl font-black tracking-tight leading-[1.2] uppercase text-lab-dark text-left flex-1">
                     {project.title.includes(':') ? (
                       <>
                         {project.title.split(':')[0]} <br />
-                        <span className="text-xl md:text-2xl opacity-40 block mt-2 font-bold">{project.title.split(':')[1]}</span>
+                        <span className="text-sm sm:text-xl md:text-2xl opacity-40 block mt-2 font-bold">{project.title.split(':')[1]}</span>
                       </>
                     ) : project.title}
                   </h2>
@@ -201,27 +201,27 @@ const ProjectReport = ({ projectId, onBack }) => {
 
                 {/* Summary Keywords (Highlights) - Positioned right under title */}
                 {project.overview.summaryKeywords && (
-                  <div className="flex flex-wrap gap-4 mt-2">
+                  <div className="flex flex-wrap gap-3 md:gap-4 mt-2">
                     {project.overview.summaryKeywords.map((kw, i) => (
-                      <span key={i} className="text-lg md:text-xl font-black text-lab-dark flex items-center gap-2">
+                      <span key={i} className="text-base sm:text-lg md:text-xl font-black text-lab-dark flex items-center gap-2">
                         <span style={{ color: project.color }}>{kw.split(' ')[0]}</span>
                         <span>{kw.split(' ').slice(1).join(' ')}</span>
-                        {i < project.overview.summaryKeywords.length - 1 && <span className="opacity-20 ml-2">|</span>}
+                        {i < project.overview.summaryKeywords.length - 1 && <span className="opacity-20 ml-2 hidden sm:inline">|</span>}
                       </span>
                     ))}
                   </div>
                 )}
               </div>
 
-              <p className="text-[15px] font-medium leading-[1.8] text-lab-dark/60 max-w-3xl italic whitespace-pre-line text-left">
+              <p className="text-sm sm:text-[15px] font-medium leading-[1.8] text-lab-dark/60 max-w-3xl italic whitespace-pre-line text-left">
                 " {project.overview.definition} "
               </p>
 
               <div className="flex flex-col gap-3 mt-4">
-                <div className="flex items-center gap-2 text-[13px] font-black opacity-60 tracking-[0.2em] text-lab-dark uppercase">
+                <div className="flex items-center gap-2 text-[11px] font-black opacity-60 tracking-[0.2em] text-lab-dark uppercase">
                   <Briefcase size={16} /><span>담당 역할</span>
                 </div>
-                <span className="text-xl md:text-2xl font-black text-lab-dark uppercase border-b-4 border-lab-dark/10 pb-2 w-fit">
+                <span className="text-lg sm:text-xl md:text-2xl font-black text-lab-dark uppercase border-b-4 border-lab-dark/10 pb-2 w-fit">
                   {project.overview.role}
                 </span>
               </div>
@@ -404,9 +404,9 @@ const ProjectReport = ({ projectId, onBack }) => {
             <div className="flex-1 h-[1px] bg-lab-dark/10" />
           </div>
 
-          <div className="glass-lab p-10 md:p-6 border border-lab-dark/10 shadow-sm relative overflow-hidden group">
-            <div className={`flex flex-col gap-6 relative z-10 ${project.displayMode === 'presentation' ? '' : 'max-w-4xl border-l-[4px] border-lab-dark/20 pl-8 ml-2'}`}>
-              <div className="text-[14px] md:text-lg leading-[2] italic text-lab-dark font-medium w-full">
+          <div className="glass-lab p-6 sm:p-10 border border-lab-dark/10 shadow-sm relative overflow-hidden group">
+            <div className={`flex flex-col gap-6 relative z-10 ${project.displayMode === 'presentation' ? '' : 'max-w-4xl border-l-[4px] border-lab-dark/20 pl-4 sm:pl-8 ml-1 sm:ml-2'}`}>
+              <div className="text-[13px] sm:text-[14px] md:text-lg leading-[1.8] md:leading-[2] italic text-lab-dark font-medium w-full">
                 {project.displayMode === 'presentation' ? (
                   <div className="flex flex-col gap-4">
                     {/* Lab Station PDF Header */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import MainView from './components/MainView';
 import ProjectReport from './components/ProjectReport';
@@ -6,6 +6,18 @@ import ProjectReport from './components/ProjectReport';
 function App() {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [wasInDetail, setWasInDetail] = useState(false);
+
+  // URL 파라미터 감지 (?project=MENTAL 형식)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const projectIdFromUrl = params.get('project');
+    
+    if (projectIdFromUrl) {
+      // 대문자로 변환하여 매칭 (데이터 구조가 대문자 키를 사용하므로)
+      const targetId = projectIdFromUrl.toUpperCase();
+      setSelectedProjectId(targetId);
+    }
+  }, []);
 
   const handleSelect = (id) => {
     setSelectedProjectId(id);
@@ -15,6 +27,8 @@ function App() {
   const handleBack = () => {
     setSelectedProjectId(null);
     setWasInDetail(true);
+    // 뒤로 가기 시 URL 파라미터 제거 (선택 사항)
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   return (
